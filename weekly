@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#What u want to back up
+Source=$""
+
+#Where to back it up
+Backup=$""
+
+#sets Date
+Date=$(date +%F)
+
+#rsunt selected files
+rsync -a --delete --quiet $Source $Backup/$Date
+
+#Creats most resent backup date file
+echo "$Date" > $Backup/Date.txt
