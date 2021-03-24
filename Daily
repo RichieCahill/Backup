@@ -18,4 +18,5 @@ if [ -e $Backup/incr/$DAY ] ; then
 fi
 
 #rsync difrental daly backup
-rsync -a --delete --quiet --inplace --backup --backup-dir=$Backup/incr/$DAY $Source $Backup/$Date
+rsync -a --delete --quiet --inplace --backup --backup-dir=$Backup/incr/$DAY $Source $Backup/$Date/
+done
