@@ -17,6 +17,6 @@ if [ -e $Backup/incr/$DAY ] ; then
   rm -fr $Backup/incr/$DAY
 fi
 
-#rsync difrental daly backup
+#rsync differential daily backup
 rsync -a --delete --quiet --inplace --backup --backup-dir=$Backup/incr/$DAY $Source $Backup/$Date/
 done
