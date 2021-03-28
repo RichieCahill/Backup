@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #What u want to back up
-Source=$""
+Source=""
 
 #Where to back it up
-Backup=$""
+Backup=""
 
 #sets Date
 Date=$(date +%F)
