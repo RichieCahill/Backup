@@ -1,16 +1,73 @@
 #!/bin/bash
 
-#What u want to back up
-Source=$""
+#######################################
+# Print a line separator
+#
+# Quite literally just prints '-' 80 times
+#
+# OUTPUTS:
+#   Write separator to stdout
+# RETURN:
+#   0 if print succeeds, non-zero on error.
+#######################################
+function gen_sep() {
+    i=0
+    printf "<"
+    while [ "$i" -lt 78 ]; do
+        printf "-"
+        ((++i))
+    done
+    printf ">"
+}
 
-#Where to back it up
-Backup=$""
+# Check if run with 2 arguments, output usage otherwise
+if [ $# -eq 2 ]; then
+    # Parse date and source path
+    date="$(date +%F)"
+    datetime="$(date +%F-%H:%M)"
+    srcdir=$(realpath "$1")
 
-#sets Date
-Date=$(date +%F)
+    # Create destination directory with log directory if needed
+    if [ ! -d "$2" ]; then
+        mkdir -p "$2/logs"
+    fi
 
-#rsunt selected files
-rsync -a --delete --quiet $Source $Backup/$Date
+    # Parse destination path
+    dstdir=$(realpath "$2")
+    log="$dstdir/logs/rdl.log"
 
-#Creats most resent backup date file
-echo "$Date" > $Backup/Date.txt
+    # Do rdiff-backup and append to logfile
+    {
+        # Insert basic information
+        printf "%s\nWeekly Backup\nTimestamp: %s\n\nBacking up %s to %s\n\n" "$(gen_sep)" "$datetime" "$srcdir" "$dstdir"
+        printf "Begin rdiff-backup logs\n\n"
+
+        # Begin backup
+        rsync -a --delete -v "$srcdir" "$dstdir/$date"
+    } >>"$log"
+
+    printf "\n\nBegin logrotate logs\n\n" >>"$log"
+
+    # Generate logrotate configuration file if necessary
+    if [ ! -f "$dstdir/logs/logrotate.conf" ]; then
+        cat <<-EOF >"$dstdir/logs/logrotate.conf"
+			$dstdir/logs/rdl.log {
+			    weekly
+			    create
+			    rotate 13
+			    compress
+			    dateext
+			    dateformat -%d-%m-%Y
+			    missingok
+			    notifempty
+			}
+		EOF
+    fi
+
+    # Rotate logs
+    logrotate "$dstdir/logs/logrotate.conf" --state "$dstdir/logs/logrotate-state" --verbose >>"$log" 2>&1
+    echo "$date" >"$dstdir/Date.txt"
+else
+    # If the wrong number of arguments are passed, print usage
+    echo "Usage: $0 <source directory> <destination directory>"
+fi

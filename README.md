@@ -1,2 +1,2 @@
 # Backup
-rsync backup automation
+rsync backup automation with additional logging

@@ -1,22 +1,85 @@
 #!/bin/bash
 
-#What u want to back up
-Source=$""
+#######################################
+# Print a line separator
+#
+# Quite literally just prints '-' 80 times
+#
+# OUTPUTS:
+#   Write separator to stdout
+# RETURN:
+#   0 if print succeeds, non-zero on error.
+#######################################
+function gen_sep() {
+  i=0
+  printf "<"
+  while [ "$i" -lt 78 ]; do
+    printf "-"
+    ((++i))
+  done
+  printf ">"
+}
 
-#Where to back it up
-Backup=$""
+# Check if run with 2 arguments, output usage otherwise
+if [ $# -eq 2 ]; then
+  # Parse date and source path
+  day="$(date +%a)"
+  datetime="$(date +%F-%H:%M)"
+  srcdir=$(realpath "$1")
 
-#sets DAY to Day of the week
-DAY=$(date +%a)
+  # Create destination directory with log directory if needed
+  if [ ! -d "$2" ]; then
+    mkdir -p "$2/logs"
+  fi
 
-#Gets data of last full back up
-cat $Backup/Date.txt | while read Date; do
+  # Parse destination path
+  dstdir=$(realpath "$2")
+  log="$dstdir/logs/rdl.log"
 
-#if File exsits then deleat it
-if [ -e $Backup/incr/$DAY ] ; then
-  rm -fr $Backup/incr/$DAY
+  if [ ! -f "$dstdir/Date.txt" ]; then
+    touch "$dstdir/Date.txt"
+  fi
+
+  # Do rdiff-backup and append to logfile
+  {
+    # Insert basic information
+    printf "%s\nWeekly Backup\nTimestamp: %s\n\nBacking up %s to %s\n\n" "$(gen_sep)" "$datetime" "$srcdir" "$dstdir"
+    printf "Begin rdiff-backup logs\n\n"
+
+    #Gets data of last full back up
+    while read -r Date; do
+
+      #if File exsits then deleat it
+      if [ -e "$dstdir/incr/$day" ]; then
+        rm -fr "$dstdir/incr/$day"
+      fi
+
+      #rsync differential daily backup
+      rsync -a --delete -v --inplace --backup --backup-dir="$dstdir/incr/$day" "$srcdir" "$dstdir/$Date/"
+    done <"$dstdir/Date.txt"
+  } >>"$log"
+
+  printf "\n\nBegin logrotate logs\n\n" >>"$log"
+
+  # Generate logrotate configuration file if necessary
+  if [ ! -f "$dstdir/logs/logrotate.conf" ]; then
+    cat <<-EOF >"$dstdir/logs/logrotate.conf"
+			$dstdir/logs/rdl.log {
+			    weekly
+			    create
+			    rotate 13
+			    compress
+			    dateext
+			    dateformat -%d-%m-%Y
+			    missingok
+			    notifempty
+			}
+		EOF
+  fi
+
+  # Rotate logs
+  logrotate "$dstdir/logs/logrotate.conf" --state "$dstdir/logs/logrotate-state" --verbose >>"$log" 2>&1
+else
+  # If the wrong number of arguments are passed, print usage
+  echo "Usage: $0 <source directory> <destination directory>"
 fi
-
-#rsync differential daily backup
-rsync -a --delete --quiet --inplace --backup --backup-dir=$Backup/incr/$DAY $Source $Backup/$Date/
-done
