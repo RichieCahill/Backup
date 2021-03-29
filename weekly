@@ -1,25 +1,19 @@
 #!/bin/bash
 
-#What u want to back up
-Source="Sourd dir"
-
-#Where to back it up
-Backup="Bacup dir"
-
-#sets Date
+#sets the date
 Date=$(date +%F)
 
 #rsunt selected files
-rsync -a --delete --quiet $Source "$Backup/$Date"
+rsync -a --delete --quiet $1 $2/$Date
 
 #Creats most resent backup date file
-echo "$Date" > "$Backup/Date.txt"
+echo "$Date" > $2/Date.txt
 
 #cuts the end off $source
-End=$(echo "$Source" | awk -F/ '{print $NF}')
+End=$(echo $1 | awk -F/ '{print $NF}')
 
 #Checks if Backup is sucsesful
-diff -r "$Source" "$Backup/$Date/$End"
+diff -r "$1" "$2"/"$Date"/"$End"
 
 #Notifation
 if [[ $(echo $?) -eq 0 ]]; then
@@ -33,5 +27,5 @@ fi
 msg_content=\"$message\"
 
 ## discord webhook
-url='Discord web hook'
+url='https://discordapp.com/api/webhooks/825851796722417744/CNzrwOouexcnNnADMABSfJ8GjnEgs1YnwUG9SBWVkCxlRESpCvrTSycn0xX1u8RKk2I7'
 curl -H "Content-Type: application/json" -X POST -d "{\"content\": $msg_content}" $url
