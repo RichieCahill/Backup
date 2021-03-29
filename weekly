@@ -7,13 +7,13 @@ Date=$(date +%F)
 rsync -a --delete --quiet $1 $2/$Date
 
 #Creats most resent backup date file
-echo "$Date" > $2/Date.txt
+echo "$Date" > "$2/Date.txt"
 
 #cuts the end off $source
-End=$(echo $1 | awk -F/ '{print $NF}')
+End=$(echo "$1" | awk -F/ '{print $NF}')
 
 #Checks if Backup is sucsesful
-diff -r "$1" "$2"/"$Date"/"$End"
+diff -r "$1" "$2/$Date/$End"
 
 #Notifation
 if [[ $(echo $?) -eq 0 ]]; then
