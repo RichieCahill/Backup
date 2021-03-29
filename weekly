@@ -27,5 +27,5 @@ fi
 msg_content=\"$message\"
 
 ## discord webhook
-url='https://discordapp.com/api/webhooks/825851796722417744/CNzrwOouexcnNnADMABSfJ8GjnEgs1YnwUG9SBWVkCxlRESpCvrTSycn0xX1u8RKk2I7'
+url=''
 curl -H "Content-Type: application/json" -X POST -d "{\"content\": $msg_content}" $url
