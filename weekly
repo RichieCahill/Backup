@@ -3,23 +3,11 @@
 #sets the date
 Date=$(date +%F)
 
-#rsunt selected files
-rsync -a --delete --quiet $1 $2/$Date
-
-#Creats most resent backup date file
-echo "$Date" > "$2/Date.txt"
-
-#cuts the end off $source
-End=$(echo "$1" | awk -F/ '{print $NF}')
-
-#Checks if Backup is sucsesful
-diff -r "$1" "$2/$Date/$End"
-
-#Notifation
-if [[ $(echo $?) -eq 0 ]]; then
+#Runs rsync arter rsync runs msgs discord
+if [[ $(rsync -a --delete "$1" "$2/$Date") -eq 0 ]]; then
   message="Success"
 else
-  message="@everyone Fail"
+  message="@everyone Fail $?"
 fi
 
 ## format to parse to curl
@@ -29,3 +17,6 @@ msg_content=\"$message\"
 ## discord webhook
 url=''
 curl -H "Content-Type: application/json" -X POST -d "{\"content\": $msg_content}" $url
+
+#Creats most resent backup date file
+echo "$Date" > "$2/Date.txt"
