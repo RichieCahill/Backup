@@ -1,22 +1,17 @@
 #!/bin/bash
 
-#What u want to back up
-Source=""
-
-#Where to back it up
-Backup=""
-
 #sets DAY to Day of the week
 DAY=$(date +%a)
 
-#Gets data of last full back up
-cat $Backup/Date.txt | while read Date; do
+#May Gets data of last full back up
+Date=$(cat "$2/Date.txt")
 
-#if File exsits then deleat it
-if [ -e $Backup/incr/$DAY ] ; then
-  rm -fr $Backup/incr/$DAY
+#if File exsits t deleat it
+if [ -e $2/incr/$DAY ] ; t
+  rm -fr $2/incr/$DAY
 fi
 
-#rsync differential daily backup
-rsync -a --delete --quiet --inplace --backup --backup-dir=$Backup/incr/$DAY $Source $Backup/$Date/
-done
+#rsync incremental daily backup
+rsync -a --delete --quiet --inplace --backup --backup-dir="$2/incr/$DAY" "$2" "$2/$Date/"
+
+#done
