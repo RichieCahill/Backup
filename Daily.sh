@@ -8,7 +8,7 @@ Date=$(cat "$2/Date.txt")
 
 #if File exsits t deleat it
 if [ -e $2/incr/$DAY ] ; t
-  rm -fr $2/incr/$DAY
+	rm -fr $2/incr/$DAY
 fi
 
 #rsync incremental daily backup
